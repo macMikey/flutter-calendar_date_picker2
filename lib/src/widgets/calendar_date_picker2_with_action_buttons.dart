@@ -79,6 +79,32 @@ class _CalendarDatePicker2WithActionButtonsState
     super.didUpdateWidget(oldWidget);
   }
 
+  void _onDateSelected(List<DateTime?> values) {
+    if (widget.config.calendarType == CalendarDatePicker2Type.range) {
+      if (_editCache.length == 2) {
+        final newDate = values.last!;
+        final firstDate = _editCache[0]!;
+        final secondDate = _editCache[1]!;
+        final differenceToFirstDate = (newDate.difference(firstDate)).abs();
+        final differenceToSecondDate = (newDate.difference(secondDate)).abs();
+
+        if (differenceToFirstDate < differenceToSecondDate) {
+          _editCache[0] = newDate;
+        } else {
+          _editCache[1] = newDate;
+        }
+      } else {
+        _editCache = values;
+      }
+    } else {
+      _editCache = values;
+    }
+
+    setState(() {
+      widget.onValueChanged?.call(_editCache);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations =
@@ -91,7 +117,7 @@ class _CalendarDatePicker2WithActionButtonsState
           child: CalendarDatePicker2(
             value: [..._editCache],
             config: widget.config,
-            onValueChanged: (values) => _editCache = values,
+            onValueChanged: (values) => _onDateSelected(values),
             onDisplayedMonthChanged: widget.onDisplayedMonthChanged,
           ),
         ),
